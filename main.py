@@ -6,6 +6,7 @@ from fastapi import FastAPI, Request, status, BackgroundTasks
 from fastapi.responses import ORJSONResponse, RedirectResponse
 from fastapi.exceptions import RequestValidationError
 import httpx
+from datetime import datetime
 from exchange.stock.kis import KoreaInvestment
 from exchange.model import MarketOrder, PriceRequest, HedgeData, OrderRequest
 from exchange.utility import (
@@ -26,9 +27,15 @@ import ipaddress
 import os
 import sys
 from devtools import debug
+import asyncio
+from asset_monitor import run_periodic_asset_report
 
 VERSION = "0.1.3"
 app = FastAPI(default_response_class=ORJSONResponse)
+
+# 자산 모니터링 활성화 여부 (환경변수로 설정 가능)
+ENABLE_ASSET_MONITOR = os.getenv("ENABLE_ASSET_MONITOR", "false").lower() == "true"
+ASSET_REPORT_INTERVAL_HOURS = int(os.getenv("ASSET_REPORT_INTERVAL_HOURS", "6"))
 
 
 def get_error(e):
@@ -51,6 +58,11 @@ def get_error(e):
 @app.on_event("startup")
 async def startup():
     log_message(f"POABOT 실행 완료! - 버전:{VERSION}")
+    
+    # 자산 모니터링 시작
+    if ENABLE_ASSET_MONITOR and settings.DISCORD_WEBHOOK_URL:
+        log_message(f"자산 모니터링 시작 - {ASSET_REPORT_INTERVAL_HOURS}시간 간격")
+        asyncio.create_task(run_periodic_asset_report(ASSET_REPORT_INTERVAL_HOURS))
 
 
 @app.on_event("shutdown")
@@ -120,6 +132,32 @@ async def get_ip():
 @app.get("/hi")
 async def welcome():
     return "hi!!"
+
+
+@app.get("/assets")
+async def get_assets():
+    """자산 현황 즉시 조회 API"""
+    from asset_monitor import AssetMonitor
+    monitor = AssetMonitor()
+    
+    crypto_assets = await monitor.get_crypto_assets()
+    stock_assets = await monitor.get_stock_assets()
+    
+    return {
+        "crypto": crypto_assets,
+        "stock": stock_assets,
+        "timestamp": datetime.now().isoformat()
+    }
+
+
+@app.post("/assets/report")
+async def send_asset_report():
+    """자산 현황 리포트 즉시 전송"""
+    from asset_monitor import AssetMonitor
+    monitor = AssetMonitor()
+    
+    await monitor.report_assets()
+    return {"result": "success", "message": "자산 현황 리포트가 전송되었습니다."}
 
 
 @app.post("/price")

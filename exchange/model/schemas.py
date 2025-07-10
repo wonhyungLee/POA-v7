@@ -5,7 +5,7 @@ from pathlib import Path
 from enum import Enum
 from devtools import debug
 
-CRYPTO_LITERAL = Literal["BINANCE", "UPBIT", "BYBIT", "BITGET", "OKX"]
+CRYPTO_LITERAL = Literal["BINANCE", "UPBIT", "BITHUMB", "BYBIT", "BITGET", "OKX"]
 
 
 STOCK_LITERAL = Literal[
@@ -19,6 +19,7 @@ STOCK_LITERAL = Literal[
 EXCHANGE_LITERAL = Literal[
     "BINANCE",
     "UPBIT",
+    "BITHUMB",
     "BYBIT",
     "BITGET",
     "OKX",
@@ -56,7 +57,7 @@ def find_env_file():
 env_path = find_env_file()
 
 
-CRYPTO_EXCHANGES = ("BINANCE", "UPBIT", "BYBIT", "BITGET", "OKX")
+CRYPTO_EXCHANGES = ("BINANCE", "UPBIT", "BITHUMB", "BYBIT", "BITGET", "OKX")
 
 STOCK_EXCHANGES = (
     "KRX",
@@ -65,7 +66,7 @@ STOCK_EXCHANGES = (
     "AMEX",
 )
 
-COST_BASED_ORDER_EXCHANGES = ("UPBIT", "BYBIT", "BITGET")
+COST_BASED_ORDER_EXCHANGES = ("UPBIT", "BITHUMB", "BYBIT", "BITGET")
 
 NO_ORDER_AMOUNT_OUTPUT_EXCHANGES = (
     "BITGET",
@@ -94,6 +95,8 @@ class Settings(BaseSettings):
     UPBIT_SECRET: str | None = None
     BINANCE_KEY: str | None = None
     BINANCE_SECRET: str | None = None
+    BITHUMB_KEY: str | None = None
+    BITHUMB_SECRET: str | None = None
     BYBIT_KEY: str | None = None
     BYBIT_SECRET: str | None = None
     BITGET_KEY: str | None = None
