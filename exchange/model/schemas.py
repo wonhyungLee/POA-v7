@@ -5,7 +5,7 @@ from pathlib import Path
 from enum import Enum
 from devtools import debug
 
-CRYPTO_LITERAL = Literal["BINANCE", "UPBIT", "BITHUMB", "BYBIT", "BITGET", "OKX"]
+CRYPTO_LITERAL = Literal["BINANCE", "UPBIT", "BYBIT", "BITGET", "OKX"]  # BITHUMB 임시 제외
 
 
 STOCK_LITERAL = Literal[
@@ -19,7 +19,7 @@ STOCK_LITERAL = Literal[
 EXCHANGE_LITERAL = Literal[
     "BINANCE",
     "UPBIT",
-    "BITHUMB",
+    # "BITHUMB",  # 임시 제외
     "BYBIT",
     "BITGET",
     "OKX",
@@ -57,7 +57,7 @@ def find_env_file():
 env_path = find_env_file()
 
 
-CRYPTO_EXCHANGES = ("BINANCE", "UPBIT", "BITHUMB", "BYBIT", "BITGET", "OKX")
+CRYPTO_EXCHANGES = ("BINANCE", "UPBIT", "BYBIT", "BITGET", "OKX")  # BITHUMB 임시 제외
 
 STOCK_EXCHANGES = (
     "KRX",
@@ -66,7 +66,7 @@ STOCK_EXCHANGES = (
     "AMEX",
 )
 
-COST_BASED_ORDER_EXCHANGES = ("UPBIT", "BITHUMB", "BYBIT", "BITGET")
+COST_BASED_ORDER_EXCHANGES = ("UPBIT", "BYBIT", "BITGET")  # BITHUMB 임시 제외
 
 NO_ORDER_AMOUNT_OUTPUT_EXCHANGES = (
     "BITGET",
@@ -87,7 +87,7 @@ crypto_futures_code = ("PERP", ".P")
 
 
 class Settings(BaseSettings):
-    PASSWORD: str
+    PASSWORD: str  # 필수 필드 - 반드시 설정해야 함
     WHITELIST: list[str] | None = None
     PORT: int | None = None
     DISCORD_WEBHOOK_URL: str | None = None

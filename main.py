@@ -28,7 +28,6 @@ import os
 import sys
 from devtools import debug
 import asyncio
-from asset_monitor import run_periodic_asset_report
 
 VERSION = "0.1.3"
 app = FastAPI(default_response_class=ORJSONResponse)
@@ -61,8 +60,12 @@ async def startup():
     
     # 자산 모니터링 시작
     if ENABLE_ASSET_MONITOR and settings.DISCORD_WEBHOOK_URL:
-        log_message(f"자산 모니터링 시작 - {ASSET_REPORT_INTERVAL_HOURS}시간 간격")
-        asyncio.create_task(run_periodic_asset_report(ASSET_REPORT_INTERVAL_HOURS))
+        try:
+            from asset_monitor import run_periodic_asset_report
+            log_message(f"자산 모니터링 시작 - {ASSET_REPORT_INTERVAL_HOURS}시간 간격")
+            asyncio.create_task(run_periodic_asset_report(ASSET_REPORT_INTERVAL_HOURS))
+        except Exception as e:
+            log_message(f"자산 모니터링 모듈 로드 실패: {str(e)}")
 
 
 @app.on_event("shutdown")

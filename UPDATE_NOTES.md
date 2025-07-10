@@ -15,10 +15,10 @@ cp .env.template .env
 - 수정: KIS1, KIS2, KIS3, KIS4 모두 실전투자 계좌로 인식되도록 변경
 - `exchange/stock/kis.py` 파일에서 `paper_base_url` 사용 조건 제거
 
-### 3. Bithumb 거래소 지원 추가
-- `BITHUMB` 거래소가 지원 목록에 추가됨
-- `exchange/bithumb.py` 파일에 Bithumb API 구현
-- 환경변수: `BITHUMB_KEY`, `BITHUMB_SECRET` 설정 필요
+### 3. Upbit 및 Bithumb 거래소 지원
+- **Upbit**: 정상 작동 확인
+- **Bithumb**: 코드는 준비되어 있으나 ccxt 라이브러리에 기본 포함되지 않아 현재 비활성화 상태
+- Bithumb 활성화를 위해서는 추가 작업 필요
 
 ### 4. 자산 모니터링 기능 추가
 - 정기적으로 전체 거래소와 주식 계좌의 자산 현황을 디스코드로 알림
@@ -62,9 +62,9 @@ python run.py
 
 ## 주의사항
 
-1. **Bithumb 사용 시**: 
-   - `BITHUMB_KEY`와 `BITHUMB_SECRET` 설정 필수
-   - Bithumb은 KRW 마켓만 지원
+1. **Bithumb**: 
+   - 현재 ccxt에 기본 포함되지 않아 비활성화 상태
+   - 향후 ccxt-bithumb 등 별도 패키지 설치로 활성화 가능
 
 2. **자산 모니터링**:
    - 디스코드 웹훅 URL이 설정되어 있어야 함
@@ -85,6 +85,6 @@ python run.py
 2. `DISCORD_WEBHOOK_URL` 설정 확인
 3. 로그에서 오류 메시지 확인
 
-### Bithumb 연결 문제
-- Bithumb API는 IP 화이트리스트 설정이 필요할 수 있음
-- API 키 권한 확인 (잔고 조회, 주문 권한 필요)
+### Bithumb 연결
+- 현재 비활성화 상태
+- 필요 시 별도 설치 방법 문의

@@ -1,7 +1,7 @@
 from datetime import datetime
 import asyncio
 import httpx
-from exchange import get_bot
+from exchange.pexchange import get_bot
 from exchange.utility import settings, log_message
 from typing import Dict, List
 import json
@@ -41,18 +41,18 @@ class AssetMonitor:
         except Exception as e:
             log_message(f"Upbit 자산 조회 실패: {str(e)}")
             
-        # Bithumb
-        try:
-            if settings.BITHUMB_KEY:
-                bithumb = get_bot("BITHUMB")
-                balance = bithumb.get_balance("ALL")
-                assets["BITHUMB"] = {
-                    "total_krw": float(balance.get("total_krw", 0)),
-                    "balances": {k: float(v) for k, v in balance.items() 
-                               if k.startswith("total_") and float(v) > 0}
-                }
-        except Exception as e:
-            log_message(f"Bithumb 자산 조회 실패: {str(e)}")
+        # Bithumb - 임시로 비활성화 (ccxt에 기본 포함되지 않음)
+        # try:
+        #     if settings.BITHUMB_KEY:
+        #         bithumb = get_bot("BITHUMB")
+        #         balance = bithumb.get_balance("ALL")
+        #         assets["BITHUMB"] = {
+        #             "total_krw": float(balance.get("total_krw", 0)),
+        #             "balances": {k: float(v) for k, v in balance.items() 
+        #                        if k.startswith("total_") and float(v) > 0}
+        #         }
+        # except Exception as e:
+        #     log_message(f"Bithumb 자산 조회 실패: {str(e)}")
             
         # Bybit
         try:
