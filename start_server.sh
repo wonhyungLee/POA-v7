@@ -8,7 +8,7 @@ echo ""
 
 # Python 버전 확인
 echo "🐍 Python 버전 확인..."
-python --version
+python3 --version
 echo ""
 
 # .env 파일 확인
@@ -29,7 +29,7 @@ fi
 
 # 환경 테스트 실행
 echo "🔍 환경 설정 테스트..."
-python test_env.py
+python3 test_env.py
 
 if [ $? -ne 0 ]; then
     echo ""
@@ -47,4 +47,4 @@ pip install -r requirements.txt -q
 echo ""
 echo "✨ 서버를 시작합니다..."
 echo ""
-python run.py
+python3 run.py

@@ -303,59 +303,76 @@ class KoreaInvestment:
             return None
 
     def get_balance(self):
-        """국내 및 해외 주식 잔고 조회"""
-        domestic = self._get_domestic_balance()
-        overseas = self._get_overseas_balance()
+        """국내 및 해외 주식 잔고 조회 통합 메서드"""
+        try:
+            # 국내주식 잔고 조회
+            domestic_result = self._get_domestic_balance()
+            
+            # 해외주식 잔고 조회  
+            overseas_result = self._get_overseas_balance()
+            
+            # 결과 통합
+            total_krw = domestic_result.get('total_krw', 0) + overseas_result.get('total_krw', 0)
+            all_stocks = domestic_result.get('stocks', []) + overseas_result.get('stocks', [])
+            
+            return {
+                'total_krw': total_krw,
+                'stocks': all_stocks
+            }
+        except Exception as e:
+            from exchange.utility import log_message
+            log_message(f'KIS 자산 조회 실패: {str(e)}')
+            return {'total_krw': 0, 'stocks': []}
         
-        total_krw = domestic['total_krw'] + overseas['total_krw']
-        stocks = domestic['stocks'] + overseas['stocks']
-        
-        return {
-            "total_krw": total_krw,
-            "stocks": stocks
-        }
-
     def _get_domestic_balance(self):
-        """국내 주식 잔고 조회 (TTTC8434R)"""
-        endpoint = "/uapi/domestic-stock/v1/trading/inquire-balance"
+        """국내 주식 잔고 조회"""
+        endpoint = '/uapi/domestic-stock/v1/trading/inquire-balance'
         headers = self.base_headers.copy()
-        headers["tr_id"] = "TTTC8434R"
+        headers['tr_id'] = 'TTTC8434R'
         
         params = {
-            "CANO": self.account_number,
-            "ACNT_PRDT_CD": "01",
-            "AFHR_FLNG_YN": "N",
-            "OFL_YN": "N",
-            "INQR_DVSN": "01",
-            "UNPR_DVSN": "01",
-            "FUND_STTL_ICLD_YN": "N",
-            "FNCG_AMT_AUTO_RDPT_YN": "N",
-            "PRCS_DVSN": "00",
-            "CTX_AREA_FK100": "",
-            "CTX_AREA_NK100": ""
+            'CANO': self.account_number,
+            'ACNT_PRDT_CD': '01',
+            'AFHR_FLNG_YN': 'N',
+            'OFL_YN': '',
+            'INQR_DVSN': '02',
+            'UNPR_DVSN': '01', 
+            'FUND_STTL_ICLD_YN': 'N',
+            'FNCG_AMT_AUTO_RDPT_YN': 'N',
+            'PRCS_DVSN': '01',
+            'CTX_AREA_FK100': '',
+            'CTX_AREA_NK100': ''
         }
         
         try:
-            res = self.get(endpoint, params=params, headers=headers)
-            if res and res.get('rt_cd') == '0':
-                total_krw = int(res['output2'][0]['tot_evlu_amt'])
-                stocks = [
-                    {
-                        "symbol": item['pdno'],
-                        "name": item['prdt_name'],
-                        "quantity": int(item['hldg_qty']),
-                        "average_price": float(item['pchs_avg_pric']),
-                        "current_price": float(item['prpr']),
-                        "eval_amount": int(item['evlu_amt'])
-                    }
-                    for item in res.get('output1', [])
-                ]
-                return {"total_krw": total_krw, "stocks": stocks}
+            response = self.get(endpoint, params=params, headers=headers)
+            if response and response.get('rt_cd') == '0':
+                output1 = response.get('output1', [])
+                output2 = response.get('output2', [])
+                
+                total_krw = 0
+                if output2:
+                    total_krw = int(output2[0].get('tot_evlu_amt', 0))
+                    
+                stocks = []
+                for item in output1:
+                    if int(item.get('hldg_qty', 0)) > 0:
+                        stocks.append({
+                            'symbol': item.get('pdno', ''),
+                            'name': item.get('prdt_name', ''),
+                            'quantity': int(item.get('hldg_qty', 0)),
+                            'average_price': float(item.get('pchs_avg_pric', 0)),
+                            'current_price': float(item.get('prpr', 0)),
+                            'eval_amount': int(item.get('evlu_amt', 0))
+                        })
+                
+                return {'total_krw': total_krw, 'stocks': stocks}
         except Exception as e:
-            log_message(f"KIS 국내 잔고 조회 실패: {e}")
-        
-        return {"total_krw": 0, "stocks": []}
-
+            from exchange.utility import log_message
+            log_message(f'KIS 국내 잔고 조회 실패: {str(e)}')
+            
+        return {'total_krw': 0, 'stocks': []}
+    
     def _get_overseas_balance(self):
         """해외 주식 잔고 조회 (TTTS3012R)"""
         endpoint = "/uapi/overseas-stock/v1/trading/inquire-balance"

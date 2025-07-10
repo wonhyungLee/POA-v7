@@ -93,24 +93,35 @@ class AssetMonitor:
         return assets
     
     async def get_stock_assets(self) -> Dict[str, Dict]:
-        """주식 계좌 자산 조회"""
-        assets = {}
-        
-        for kis_num in range(1, 51):  # KIS1부터 KIS50까지 확인
-            try:
-                kis_key = getattr(settings, f"KIS{kis_num}_KEY", None)
-                if kis_key:
-                    bot = get_bot("KRX", kis_number=kis_num) # KRX를 통해 KIS bot 로드
-                    balance_info = bot.get_balance()
+    """주식 계좌 자산 조회"""
+    assets = {}
+    
+    for kis_num in range(1, 51):  # KIS1부터 KIS50까지 확인
+        try:
+            kis_key = getattr(settings, f'KIS{kis_num}_KEY', None)
+            if kis_key:
+                try:
+                    # KRX를 통해 KIS bot 로드
+                    bot = get_bot('KRX', kis_number=kis_num)
                     
-                    assets[f"KIS{kis_num}"] = {
-                        "total_krw": balance_info.get("total_krw", 0),
-                        "stocks": balance_info.get("stocks", [])
-                    }
-            except Exception as e:
-                log_message(f"KIS{kis_num} 자산 조회 실패: {str(e)}")
-                
-        return assets
+                    # get_balance 메서드 존재 여부 확인
+                    if hasattr(bot, 'get_balance'):
+                        balance_info = bot.get_balance()
+                        
+                        assets[f'KIS{kis_num}'] = {
+                            'total_krw': balance_info.get('total_krw', 0),
+                            'stocks': balance_info.get('stocks', [])
+                        }
+                    else:
+                        log_message(f'KIS{kis_num}: get_balance 메서드가 없습니다')
+                        
+                except Exception as e:
+                    log_message(f'KIS{kis_num} 자산 조회 실패: {str(e)}')
+                    
+        except Exception as e:
+            log_message(f'KIS{kis_num} 설정 확인 실패: {str(e)}')
+            
+    return assets
     
     def format_asset_message(self, crypto_assets: Dict, stock_assets: Dict) -> Dict:
         """디스코드 메시지 포맷팅"""
