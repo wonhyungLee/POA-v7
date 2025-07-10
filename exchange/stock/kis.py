@@ -9,6 +9,7 @@ import traceback
 import copy
 from exchange.model import MarketOrder
 from devtools import debug
+from exchange.utility import log_message
 
 
 class KoreaInvestment:
@@ -300,6 +301,102 @@ class KoreaInvestment:
         except KeyError:
             print(traceback.format_exc())
             return None
+
+    def get_balance(self):
+        """국내 및 해외 주식 잔고 조회"""
+        domestic = self._get_domestic_balance()
+        overseas = self._get_overseas_balance()
+        
+        total_krw = domestic['total_krw'] + overseas['total_krw']
+        stocks = domestic['stocks'] + overseas['stocks']
+        
+        return {
+            "total_krw": total_krw,
+            "stocks": stocks
+        }
+
+    def _get_domestic_balance(self):
+        """국내 주식 잔고 조회 (TTTC8434R)"""
+        endpoint = "/uapi/domestic-stock/v1/trading/inquire-balance"
+        headers = self.base_headers.copy()
+        headers["tr_id"] = "TTTC8434R"
+        
+        params = {
+            "CANO": self.account_number,
+            "ACNT_PRDT_CD": "01",
+            "AFHR_FLNG_YN": "N",
+            "OFL_YN": "N",
+            "INQR_DVSN": "01",
+            "UNPR_DVSN": "01",
+            "FUND_STTL_ICLD_YN": "N",
+            "FNCG_AMT_AUTO_RDPT_YN": "N",
+            "PRCS_DVSN": "00",
+            "CTX_AREA_FK100": "",
+            "CTX_AREA_NK100": ""
+        }
+        
+        try:
+            res = self.get(endpoint, params=params, headers=headers)
+            if res and res.get('rt_cd') == '0':
+                total_krw = int(res['output2'][0]['tot_evlu_amt'])
+                stocks = [
+                    {
+                        "symbol": item['pdno'],
+                        "name": item['prdt_name'],
+                        "quantity": int(item['hldg_qty']),
+                        "average_price": float(item['pchs_avg_pric']),
+                        "current_price": float(item['prpr']),
+                        "eval_amount": int(item['evlu_amt'])
+                    }
+                    for item in res.get('output1', [])
+                ]
+                return {"total_krw": total_krw, "stocks": stocks}
+        except Exception as e:
+            log_message(f"KIS 국내 잔고 조회 실패: {e}")
+        
+        return {"total_krw": 0, "stocks": []}
+
+    def _get_overseas_balance(self):
+        """해외 주식 잔고 조회 (TTTS3012R)"""
+        endpoint = "/uapi/overseas-stock/v1/trading/inquire-balance"
+        headers = self.base_headers.copy()
+        headers["tr_id"] = "TTTS3012R"
+        
+        params = {
+            "CANO": self.account_number,
+            "ACNT_PRDT_CD": "01",
+            "OVRS_EXCG_CD": "NYS", # NYS, NAS, AMS 등, 전체 조회를 위해 특정 시장 지정
+            "TR_CRCY_CD": "USD",
+            "CTX_AREA_FK200": "",
+            "CTX_AREA_NK200": ""
+        }
+        
+        total_krw = 0
+        all_stocks = []
+
+        # 주요 해외 시장에 대해 반복 조회
+        for exch_code in ["NYS", "NAS", "AMS"]:
+            params["OVRS_EXCG_CD"] = exch_code
+            try:
+                res = self.get(endpoint, params=params, headers=headers)
+                if res and res.get('rt_cd') == '0':
+                    total_krw += int(res['output2'][0]['tot_evlu_amt'])
+                    stocks = [
+                        {
+                            "symbol": item['ovrs_pdno'],
+                            "name": item['ovrs_item_name'],
+                            "quantity": int(item['ovrs_cblc_qty']),
+                            "average_price": float(item['pchs_avg_pric']),
+                            "current_price": float(item['now_pric1']),
+                            "eval_amount": int(item['frcr_evlu_amt'])
+                        }
+                        for item in res.get('output1', [])
+                    ]
+                    all_stocks.extend(stocks)
+            except Exception as e:
+                log_message(f"KIS 해외 잔고 조회 실패 ({exch_code}): {e}")
+
+        return {"total_krw": total_krw, "stocks": all_stocks}
 
     def open_json(self, path):
         with open(path, "r") as f:

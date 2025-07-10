@@ -1,1 +1,1 @@
-from exchange.stock.kis import KoreaInvestment
+from exchange.stock.kis_upgraded import KoreaInvestment

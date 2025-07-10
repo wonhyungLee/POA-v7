@@ -41,18 +41,18 @@ class AssetMonitor:
         except Exception as e:
             log_message(f"Upbit 자산 조회 실패: {str(e)}")
             
-        # Bithumb - 임시로 비활성화 (ccxt에 기본 포함되지 않음)
-        # try:
-        #     if settings.BITHUMB_KEY:
-        #         bithumb = get_bot("BITHUMB")
-        #         balance = bithumb.get_balance("ALL")
-        #         assets["BITHUMB"] = {
-        #             "total_krw": float(balance.get("total_krw", 0)),
-        #             "balances": {k: float(v) for k, v in balance.items() 
-        #                        if k.startswith("total_") and float(v) > 0}
-        #         }
-        # except Exception as e:
-        #     log_message(f"Bithumb 자산 조회 실패: {str(e)}")
+        # Bithumb
+        try:
+            if settings.BITHUMB_KEY:
+                bithumb = get_bot("BITHUMB")
+                balance = bithumb.get_balance()
+                assets["BITHUMB"] = {
+                    "total_krw": float(balance.get("total_krw", 0)),
+                    "balances": {k.replace('total_', '').upper(): float(v) for k, v in balance.items() 
+                               if k.startswith("total_") and float(v) > 0}
+                }
+        except Exception as e:
+            log_message(f"Bithumb 자산 조회 실패: {str(e)}")
             
         # Bybit
         try:
@@ -96,15 +96,16 @@ class AssetMonitor:
         """주식 계좌 자산 조회"""
         assets = {}
         
-        for kis_num in range(1, 5):
+        for kis_num in range(1, 51):  # KIS1부터 KIS50까지 확인
             try:
                 kis_key = getattr(settings, f"KIS{kis_num}_KEY", None)
                 if kis_key:
-                    # KIS API를 통한 자산 조회 로직 구현
-                    # 실제 구현은 KIS API 문서에 따라 작성 필요
+                    bot = get_bot("KRX", kis_number=kis_num) # KRX를 통해 KIS bot 로드
+                    balance_info = bot.get_balance()
+                    
                     assets[f"KIS{kis_num}"] = {
-                        "total_krw": 0,  # 실제 값으로 대체
-                        "stocks": {}  # 실제 보유 주식 정보
+                        "total_krw": balance_info.get("total_krw", 0),
+                        "stocks": balance_info.get("stocks", [])
                     }
             except Exception as e:
                 log_message(f"KIS{kis_num} 자산 조회 실패: {str(e)}")
@@ -169,6 +170,11 @@ class AssetMonitor:
             for account, data in stock_assets.items():
                 total_krw = data.get("total_krw", 0)
                 stock_field["value"] += f"**{account}**: {total_krw:,.0f} KRW\n"
+                
+                stocks = data.get("stocks", [])
+                if stocks:
+                    for stock in stocks[:5]: # 상위 5개 종목만 표시
+                        stock_field["value"] += f"  • {stock['name']} ({stock['symbol']}): {stock['quantity']}주\n"
             
             embeds[0]["fields"].append(stock_field)
         

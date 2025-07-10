@@ -175,15 +175,14 @@ class KoreaInvestment:
         amount = str(int(amount))
 
         if exchange == "KRX":
-            # 실전투자 헤더만 사용 (모의투자 제거)
             headers |= (
-                KoreaBuyOrderHeaders(**headers)
+                KoreaBuyOrderHeaders(**headers).dict()
                 if side == "buy"
-                else KoreaSellOrderHeaders(**headers)
+                else KoreaSellOrderHeaders(**headers).dict()
             )
 
             if order_type == "market":
-                body |= KoreaMarketOrderBody(**body, PDNO=ticker, ORD_QTY=amount)
+                body |= KoreaMarketOrderBody(**body, PDNO=ticker, ORD_QTY=amount).dict()
             elif order_type == "limit":
                 body |= KoreaOrderBody(
                     **body,
@@ -191,7 +190,7 @@ class KoreaInvestment:
                     ORD_DVSN=KoreaOrderType.limit,
                     ORD_QTY=amount,
                     ORD_UNPR=price,
-                )
+                ).dict()
         elif exchange in ("NASDAQ", "NYSE", "AMEX"):
             exchange_code = self.order_exchange_code.get(exchange)
             current_price = self.fetch_current_price(exchange, ticker)
@@ -204,11 +203,10 @@ class KoreaInvestment:
                 price = 1.0
             price = float("{:.2f}".format(price))
             
-            # 실전투자 헤더만 사용 (모의투자 제거)
             headers |= (
-                UsaBuyOrderHeaders(**headers)
+                UsaBuyOrderHeaders(**headers).dict()
                 if side == "buy"
-                else UsaSellOrderHeaders(**headers)
+                else UsaSellOrderHeaders(**headers).dict()
             )
 
             if order_type == "market":
@@ -219,7 +217,7 @@ class KoreaInvestment:
                     ORD_QTY=amount,
                     OVRS_ORD_UNPR=price,
                     OVRS_EXCG_CD=exchange_code,
-                )
+                ).dict()
             elif order_type == "limit":
                 body |= UsaOrderBody(
                     **body,
@@ -228,7 +226,7 @@ class KoreaInvestment:
                     ORD_QTY=amount,
                     OVRS_ORD_UNPR=price,
                     OVRS_EXCG_CD=exchange_code,
-                )
+                ).dict()
         return self.post(endpoint, body, headers)
 
     def create_market_buy_order(

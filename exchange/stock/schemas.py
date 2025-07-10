@@ -36,15 +36,15 @@ class Endpoints(str, Enum):
 
 class TransactionId(str, Enum):
 
-    korea_buy = "TTTC0802U"
-    korea_sell = "TTTC0801U"
+    korea_buy = "TTTC0012U"
+    korea_sell = "TTTC0011U"
 
     korea_paper_buy = "VTTC0802U"
     korea_paper_sell = "VTTC0801U"
     korea_paper_cancel = "VTTC0803U"
 
-    usa_buy = "JTTT1002U"
-    usa_sell = "JTTT1006U"
+    usa_buy = "TTTT1002U"
+    usa_sell = "TTTT1006U"
 
     usa_paper_buy = "VTTT1002U"
     usa_paper_sell = "VTTT1001U"

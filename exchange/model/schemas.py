@@ -5,7 +5,7 @@ from pathlib import Path
 from enum import Enum
 from devtools import debug
 
-CRYPTO_LITERAL = Literal["BINANCE", "UPBIT", "BYBIT", "BITGET", "OKX"]  # BITHUMB 임시 제외
+CRYPTO_LITERAL = Literal["BINANCE", "UPBIT", "BYBIT", "BITGET", "OKX", "BITHUMB"]
 
 
 STOCK_LITERAL = Literal[
@@ -19,7 +19,7 @@ STOCK_LITERAL = Literal[
 EXCHANGE_LITERAL = Literal[
     "BINANCE",
     "UPBIT",
-    # "BITHUMB",  # 임시 제외
+    "BITHUMB",
     "BYBIT",
     "BITGET",
     "OKX",
@@ -57,7 +57,7 @@ def find_env_file():
 env_path = find_env_file()
 
 
-CRYPTO_EXCHANGES = ("BINANCE", "UPBIT", "BYBIT", "BITGET", "OKX")  # BITHUMB 임시 제외
+CRYPTO_EXCHANGES = ("BINANCE", "UPBIT", "BYBIT", "BITGET", "OKX", "BITHUMB")
 
 STOCK_EXCHANGES = (
     "KRX",
@@ -66,7 +66,7 @@ STOCK_EXCHANGES = (
     "AMEX",
 )
 
-COST_BASED_ORDER_EXCHANGES = ("UPBIT", "BYBIT", "BITGET")  # BITHUMB 임시 제외
+COST_BASED_ORDER_EXCHANGES = ("UPBIT", "BYBIT", "BITGET", "BITHUMB")
 
 NO_ORDER_AMOUNT_OUTPUT_EXCHANGES = (
     "BITGET",
@@ -87,7 +87,7 @@ crypto_futures_code = ("PERP", ".P")
 
 
 class Settings(BaseSettings):
-    PASSWORD: str  # 필수 필드 - 반드시 설정해야 함
+    PASSWORD: str
     WHITELIST: list[str] | None = None
     PORT: int | None = None
     DISCORD_WEBHOOK_URL: str | None = None
@@ -105,6 +105,9 @@ class Settings(BaseSettings):
     OKX_KEY: str | None = None
     OKX_SECRET: str | None = None
     OKX_PASSPHRASE: str | None = None
+    DB_ID: str = "poa@admin.com"
+    DB_PASSWORD: str = "poabot!@#$"
+
     KIS1_ACCOUNT_NUMBER: str | None = None
     KIS1_ACCOUNT_CODE: str | None = None
     KIS1_KEY: str | None = None
@@ -121,11 +124,193 @@ class Settings(BaseSettings):
     KIS4_ACCOUNT_CODE: str | None = None
     KIS4_KEY: str | None = None
     KIS4_SECRET: str | None = None
-    DB_ID: str = "poa@admin.com"
-    DB_PASSWORD: str = "poabot!@#$"
+    KIS5_ACCOUNT_NUMBER: str | None = None
+    KIS5_ACCOUNT_CODE: str | None = None
+    KIS5_KEY: str | None = None
+    KIS5_SECRET: str | None = None
+    KIS6_ACCOUNT_NUMBER: str | None = None
+    KIS6_ACCOUNT_CODE: str | None = None
+    KIS6_KEY: str | None = None
+    KIS6_SECRET: str | None = None
+    KIS7_ACCOUNT_NUMBER: str | None = None
+    KIS7_ACCOUNT_CODE: str | None = None
+    KIS7_KEY: str | None = None
+    KIS7_SECRET: str | None = None
+    KIS8_ACCOUNT_NUMBER: str | None = None
+    KIS8_ACCOUNT_CODE: str | None = None
+    KIS8_KEY: str | None = None
+    KIS8_SECRET: str | None = None
+    KIS9_ACCOUNT_NUMBER: str | None = None
+    KIS9_ACCOUNT_CODE: str | None = None
+    KIS9_KEY: str | None = None
+    KIS9_SECRET: str | None = None
+    KIS10_ACCOUNT_NUMBER: str | None = None
+    KIS10_ACCOUNT_CODE: str | None = None
+    KIS10_KEY: str | None = None
+    KIS10_SECRET: str | None = None
+    KIS11_ACCOUNT_NUMBER: str | None = None
+    KIS11_ACCOUNT_CODE: str | None = None
+    KIS11_KEY: str | None = None
+    KIS11_SECRET: str | None = None
+    KIS12_ACCOUNT_NUMBER: str | None = None
+    KIS12_ACCOUNT_CODE: str | None = None
+    KIS12_KEY: str | None = None
+    KIS12_SECRET: str | None = None
+    KIS13_ACCOUNT_NUMBER: str | None = None
+    KIS13_ACCOUNT_CODE: str | None = None
+    KIS13_KEY: str | None = None
+    KIS13_SECRET: str | None = None
+    KIS14_ACCOUNT_NUMBER: str | None = None
+    KIS14_ACCOUNT_CODE: str | None = None
+    KIS14_KEY: str | None = None
+    KIS14_SECRET: str | None = None
+    KIS15_ACCOUNT_NUMBER: str | None = None
+    KIS15_ACCOUNT_CODE: str | None = None
+    KIS15_KEY: str | None = None
+    KIS15_SECRET: str | None = None
+    KIS16_ACCOUNT_NUMBER: str | None = None
+    KIS16_ACCOUNT_CODE: str | None = None
+    KIS16_KEY: str | None = None
+    KIS16_SECRET: str | None = None
+    KIS17_ACCOUNT_NUMBER: str | None = None
+    KIS17_ACCOUNT_CODE: str | None = None
+    KIS17_KEY: str | None = None
+    KIS17_SECRET: str | None = None
+    KIS18_ACCOUNT_NUMBER: str | None = None
+    KIS18_ACCOUNT_CODE: str | None = None
+    KIS18_KEY: str | None = None
+    KIS18_SECRET: str | None = None
+    KIS19_ACCOUNT_NUMBER: str | None = None
+    KIS19_ACCOUNT_CODE: str | None = None
+    KIS19_KEY: str | None = None
+    KIS19_SECRET: str | None = None
+    KIS20_ACCOUNT_NUMBER: str | None = None
+    KIS20_ACCOUNT_CODE: str | None = None
+    KIS20_KEY: str | None = None
+    KIS20_SECRET: str | None = None
+    KIS21_ACCOUNT_NUMBER: str | None = None
+    KIS21_ACCOUNT_CODE: str | None = None
+    KIS21_KEY: str | None = None
+    KIS21_SECRET: str | None = None
+    KIS22_ACCOUNT_NUMBER: str | None = None
+    KIS22_ACCOUNT_CODE: str | None = None
+    KIS22_KEY: str | None = None
+    KIS22_SECRET: str | None = None
+    KIS23_ACCOUNT_NUMBER: str | None = None
+    KIS23_ACCOUNT_CODE: str | None = None
+    KIS23_KEY: str | None = None
+    KIS23_SECRET: str | None = None
+    KIS24_ACCOUNT_NUMBER: str | None = None
+    KIS24_ACCOUNT_CODE: str | None = None
+    KIS24_KEY: str | None = None
+    KIS24_SECRET: str | None = None
+    KIS25_ACCOUNT_NUMBER: str | None = None
+    KIS25_ACCOUNT_CODE: str | None = None
+    KIS25_KEY: str | None = None
+    KIS25_SECRET: str | None = None
+    KIS26_ACCOUNT_NUMBER: str | None = None
+    KIS26_ACCOUNT_CODE: str | None = None
+    KIS26_KEY: str | None = None
+    KIS26_SECRET: str | None = None
+    KIS27_ACCOUNT_NUMBER: str | None = None
+    KIS27_ACCOUNT_CODE: str | None = None
+    KIS27_KEY: str | None = None
+    KIS27_SECRET: str | None = None
+    KIS28_ACCOUNT_NUMBER: str | None = None
+    KIS28_ACCOUNT_CODE: str | None = None
+    KIS28_KEY: str | None = None
+    KIS28_SECRET: str | None = None
+    KIS29_ACCOUNT_NUMBER: str | None = None
+    KIS29_ACCOUNT_CODE: str | None = None
+    KIS29_KEY: str | None = None
+    KIS29_SECRET: str | None = None
+    KIS30_ACCOUNT_NUMBER: str | None = None
+    KIS30_ACCOUNT_CODE: str | None = None
+    KIS30_KEY: str | None = None
+    KIS30_SECRET: str | None = None
+    KIS31_ACCOUNT_NUMBER: str | None = None
+    KIS31_ACCOUNT_CODE: str | None = None
+    KIS31_KEY: str | None = None
+    KIS31_SECRET: str | None = None
+    KIS32_ACCOUNT_NUMBER: str | None = None
+    KIS32_ACCOUNT_CODE: str | None = None
+    KIS32_KEY: str | None = None
+    KIS32_SECRET: str | None = None
+    KIS33_ACCOUNT_NUMBER: str | None = None
+    KIS33_ACCOUNT_CODE: str | None = None
+    KIS33_KEY: str | None = None
+    KIS33_SECRET: str | None = None
+    KIS34_ACCOUNT_NUMBER: str | None = None
+    KIS34_ACCOUNT_CODE: str | None = None
+    KIS34_KEY: str | None = None
+    KIS34_SECRET: str | None = None
+    KIS35_ACCOUNT_NUMBER: str | None = None
+    KIS35_ACCOUNT_CODE: str | None = None
+    KIS35_KEY: str | None = None
+    KIS35_SECRET: str | None = None
+    KIS36_ACCOUNT_NUMBER: str | None = None
+    KIS36_ACCOUNT_CODE: str | None = None
+    KIS36_KEY: str | None = None
+    KIS36_SECRET: str | None = None
+    KIS37_ACCOUNT_NUMBER: str | None = None
+    KIS37_ACCOUNT_CODE: str | None = None
+    KIS37_KEY: str | None = None
+    KIS37_SECRET: str | None = None
+    KIS38_ACCOUNT_NUMBER: str | None = None
+    KIS38_ACCOUNT_CODE: str | None = None
+    KIS38_KEY: str | None = None
+    KIS38_SECRET: str | None = None
+    KIS39_ACCOUNT_NUMBER: str | None = None
+    KIS39_ACCOUNT_CODE: str | None = None
+    KIS39_KEY: str | None = None
+    KIS39_SECRET: str | None = None
+    KIS40_ACCOUNT_NUMBER: str | None = None
+    KIS40_ACCOUNT_CODE: str | None = None
+    KIS40_KEY: str | None = None
+    KIS40_SECRET: str | None = None
+    KIS41_ACCOUNT_NUMBER: str | None = None
+    KIS41_ACCOUNT_CODE: str | None = None
+    KIS41_KEY: str | None = None
+    KIS41_SECRET: str | None = None
+    KIS42_ACCOUNT_NUMBER: str | None = None
+    KIS42_ACCOUNT_CODE: str | None = None
+    KIS42_KEY: str | None = None
+    KIS42_SECRET: str | None = None
+    KIS43_ACCOUNT_NUMBER: str | None = None
+    KIS43_ACCOUNT_CODE: str | None = None
+    KIS43_KEY: str | None = None
+    KIS43_SECRET: str | None = None
+    KIS44_ACCOUNT_NUMBER: str | None = None
+    KIS44_ACCOUNT_CODE: str | None = None
+    KIS44_KEY: str | None = None
+    KIS44_SECRET: str | None = None
+    KIS45_ACCOUNT_NUMBER: str | None = None
+    KIS45_ACCOUNT_CODE: str | None = None
+    KIS45_KEY: str | None = None
+    KIS45_SECRET: str | None = None
+    KIS46_ACCOUNT_NUMBER: str | None = None
+    KIS46_ACCOUNT_CODE: str | None = None
+    KIS46_KEY: str | None = None
+    KIS46_SECRET: str | None = None
+    KIS47_ACCOUNT_NUMBER: str | None = None
+    KIS47_ACCOUNT_CODE: str | None = None
+    KIS47_KEY: str | None = None
+    KIS47_SECRET: str | None = None
+    KIS48_ACCOUNT_NUMBER: str | None = None
+    KIS48_ACCOUNT_CODE: str | None = None
+    KIS48_KEY: str | None = None
+    KIS48_SECRET: str | None = None
+    KIS49_ACCOUNT_NUMBER: str | None = None
+    KIS49_ACCOUNT_CODE: str | None = None
+    KIS49_KEY: str | None = None
+    KIS49_SECRET: str | None = None
+    KIS50_ACCOUNT_NUMBER: str | None = None
+    KIS50_ACCOUNT_CODE: str | None = None
+    KIS50_KEY: str | None = None
+    KIS50_SECRET: str | None = None
 
     class Config:
-        env_file = env_path  # ".env"
+        env_file = env_path
         env_file_encoding = "utf-8"
 
 

@@ -153,6 +153,22 @@ async def get_assets():
     }
 
 
+@app.get("/balance/{exchange_name}")
+async def get_balance(exchange_name: str):
+    """특정 거래소의 자산 현황 조회 API"""
+    try:
+        bot = get_bot(exchange_name.upper())
+        balance = bot.get_balance()
+        return balance
+    except Exception as e:
+        error_msg = get_error(e)
+        log_error_message("\n".join(error_msg), f"{exchange_name} 자산 조회 에러")
+        return ORJSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"error": "\n".join(error_msg)},
+        )
+
+
 @app.post("/assets/report")
 async def send_asset_report():
     """자산 현황 리포트 즉시 전송"""

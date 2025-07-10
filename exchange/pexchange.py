@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from pydantic import BaseModel
 from .binance import Binance
 from .upbit import Upbit
-# from .bithumb import Bithumb  # 임시 비활성화
+from .bithumb import Bithumb
 from .bybit import Bybit
 from .bitget import Bitget
 from .okx import Okx
@@ -25,7 +25,7 @@ from .model import CRYPTO_EXCHANGES, STOCK_EXCHANGES, MarketOrder
 class Exchange(BaseModel):
     UPBIT: Upbit | None = None
     BINANCE: Binance | None = None
-    # BITHUMB: Bithumb | None = None  # 임시 비활성화
+    BITHUMB: Bithumb | None = None
     BYBIT: Bybit | None = None
     BITGET: Bitget | None = None
     OKX: Okx | None = None
@@ -33,10 +33,55 @@ class Exchange(BaseModel):
     KIS2: KoreaInvestment | None = None
     KIS3: KoreaInvestment | None = None
     KIS4: KoreaInvestment | None = None
-
+    KIS5: KoreaInvestment | None = None
+    KIS6: KoreaInvestment | None = None
+    KIS7: KoreaInvestment | None = None
+    KIS8: KoreaInvestment | None = None
+    KIS9: KoreaInvestment | None = None
+    KIS10: KoreaInvestment | None = None
+    KIS11: KoreaInvestment | None = None
+    KIS12: KoreaInvestment | None = None
+    KIS13: KoreaInvestment | None = None
+    KIS14: KoreaInvestment | None = None
+    KIS15: KoreaInvestment | None = None
+    KIS16: KoreaInvestment | None = None
+    KIS17: KoreaInvestment | None = None
+    KIS18: KoreaInvestment | None = None
+    KIS19: KoreaInvestment | None = None
+    KIS20: KoreaInvestment | None = None
+    KIS21: KoreaInvestment | None = None
+    KIS22: KoreaInvestment | None = None
+    KIS23: KoreaInvestment | None = None
+    KIS24: KoreaInvestment | None = None
+    KIS25: KoreaInvestment | None = None
+    KIS26: KoreaInvestment | None = None
+    KIS27: KoreaInvestment | None = None
+    KIS28: KoreaInvestment | None = None
+    KIS29: KoreaInvestment | None = None
+    KIS30: KoreaInvestment | None = None
+    KIS31: KoreaInvestment | None = None
+    KIS32: KoreaInvestment | None = None
+    KIS33: KoreaInvestment | None = None
+    KIS34: KoreaInvestment | None = None
+    KIS35: KoreaInvestment | None = None
+    KIS36: KoreaInvestment | None = None
+    KIS37: KoreaInvestment | None = None
+    KIS38: KoreaInvestment | None = None
+    KIS39: KoreaInvestment | None = None
+    KIS40: KoreaInvestment | None = None
+    KIS41: KoreaInvestment | None = None
+    KIS42: KoreaInvestment | None = None
+    KIS43: KoreaInvestment | None = None
+    KIS44: KoreaInvestment | None = None
+    KIS45: KoreaInvestment | None = None
+    KIS46: KoreaInvestment | None = None
+    KIS47: KoreaInvestment | None = None
+    KIS48: KoreaInvestment | None = None
+    KIS49: KoreaInvestment | None = None
+    KIS50: KoreaInvestment | None = None
+    
     class Config:
         arbitrary_types_allowed = True
-
 
 payload = {}
 
@@ -52,6 +97,8 @@ def get_exchange(exchange_name: str, kis_number=None):
                         KEY, SECRET, PASSPHRASE
                     )
                 }
+            elif exchange_name == "BITHUMB":
+                payload |= {exchange_name: globals()[exchange_name.title()]()}
             else:
                 if not payload.get(exchange_name):
                     payload |= {
@@ -78,10 +125,10 @@ def get_exchange(exchange_name: str, kis_number=None):
 
 def get_bot(
     exchange_name: Literal[
-        "BINANCE", "UPBIT", "BYBIT", "BITGET", "KRX", "NASDAQ", "NYSE", "AMEX", "OKX"  # BITHUMB 임시 제외
+        "BINANCE", "UPBIT", "BITHUMB", "BYBIT", "BITGET", "KRX", "NASDAQ", "NYSE", "AMEX", "OKX"
     ],
     kis_number=None,
-) -> Binance | Upbit | Bybit | Bitget | KoreaInvestment | Okx:  # Bithumb 임시 제외
+) -> Binance | Upbit | Bithumb | Bybit | Bitget | KoreaInvestment | Okx:
     exchange_name = exchange_name.upper()
     if exchange_name in CRYPTO_EXCHANGES:
         return get_exchange(exchange_name, kis_number).dict()[exchange_name]
@@ -95,21 +142,21 @@ def check_key(exchange_name):
         key = settings_dict.get(exchange_name + "_KEY")
         secret = settings_dict.get(exchange_name + "_SECRET")
         passphrase = settings_dict.get(exchange_name + "_PASSPHRASE")
-        if not key:
+        if key is None:
             msg = f"{exchange_name}_KEY가 없습니다"
             log_message(msg)
             raise HTTPException(status_code=404, detail=msg)
-        elif not secret:
+        elif secret is None:
             msg = f"{exchange_name}_SECRET가 없습니다"
             log_message(msg)
             raise HTTPException(status_code=404, detail=msg)
         return key, secret, passphrase
-    elif exchange_name in ("KIS1", "KIS2", "KIS3", "KIS4"):
+    elif exchange_name.startswith("KIS"):
         key = settings_dict.get(f"{exchange_name}_KEY")
         secret = settings_dict.get(f"{exchange_name}_SECRET")
         account_number = settings_dict.get(f"{exchange_name}_ACCOUNT_NUMBER")
         account_code = settings_dict.get(f"{exchange_name}_ACCOUNT_CODE")
-        if key and secret and account_number and account_code:
+        if key is not None and secret is not None and account_number is not None and account_code is not None:
             return key, secret, account_number, account_code
         else:
             raise Exception(f"{exchange_name} 키가 없습니다")
