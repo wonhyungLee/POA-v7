@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 import httpx
+from bs4 import BeautifulSoup
 from exchange.stock.error import TokenExpired
 from exchange.stock.schemas import *
 from exchange.database import db
@@ -288,6 +289,44 @@ class KoreaInvestment:
             print(traceback.format_exc())
             return None
 
+    def get_exchange_rate(self):
+        """USD/KRW 환율 조회 (다중 소스 백업)"""
+        # 1순위: 한국수출입은행 API
+        try:
+            # 참고: API 키 발급이 필요합니다. https://www.koreaexim.go.kr/site/program/openapi/openApiView?menuid=001003002002&apino=2&viewtype=C
+            # 정식 서비스에서는 'YOUR_KEY_HERE'를 발급받은 키로 교체해야 합니다.
+            auth_key = "YOUR_KEY_HERE" 
+            search_date = datetime.now().strftime('%Y%m%d')
+            url = f"https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey={auth_key}&searchdate={search_date}&data=AP01"
+            
+            response = httpx.get(url)
+            response.raise_for_status()
+            data = response.json()
+            
+            for item in data:
+                if item.get('cur_unit') == 'USD':
+                    exchange_rate_str = item.get('tts', item.get('deal_bas_r', '0')).replace(',', '')
+                    if float(exchange_rate_str) > 0:
+                        return float(exchange_rate_str)
+            raise ValueError("USD exchange rate not found in Eximbank API response")
+
+        except Exception as e:
+            print(f"한국수출입은행 API 조회 실패: {e}. 다음 단계로 진행합니다.")
+            # 2순위: 네이버 금융 크롤링
+            try:
+                url = "https://finance.naver.com/marketindex/"
+                headers = {'User-Agent': 'Mozilla/5.0'}
+                response = httpx.get(url, headers=headers)
+                response.raise_for_status()
+                soup = BeautifulSoup(response.text, "html.parser")
+                exchange_rate_str = soup.select_one("#exchangeList > li.on > a.head.usd > div > span.value").text.replace(',', '')
+                return float(exchange_rate_str)
+            except Exception as e:
+                print(f"네이버 금융 크롤링 실패: {e}. 다음 단계로 진행합니다.")
+                # 3순위: 고정 환율
+                print("모든 환율 조회 실패, 고정 환율 1350.0 적용")
+                return 1350.0
+
     def get_balance(self):
         """국내 및 해외 주식 잔고 조회 통합 메서드"""
         try:
@@ -374,7 +413,9 @@ class KoreaInvestment:
             "CTX_AREA_NK200": ""
         }
         
-        total_krw = 0
+        exchange_rate = self.get_exchange_rate()
+        
+        total_eval_usd = 0
         all_stocks = []
 
         # 주요 해외 시장에 대해 반복 조회
@@ -382,24 +423,24 @@ class KoreaInvestment:
             params["OVRS_EXCG_CD"] = exch_code
             try:
                 res = self.get(endpoint, params=params, headers=headers)
-                if res and res.get('rt_cd') == '0':
-                    total_krw += int(res['output2'][0]['tot_evlu_amt'])
-                    stocks = [
-                        {
-                            "symbol": item['ovrs_pdno'],
-                            "name": item['ovrs_item_name'],
-                            "quantity": int(item['ovrs_cblc_qty']),
-                            "average_price": float(item['pchs_avg_pric']),
-                            "current_price": float(item['now_pric1']),
-                            "eval_amount": int(item['frcr_evlu_amt'])
-                        }
-                        for item in res.get('output1', [])
-                    ]
-                    all_stocks.extend(stocks)
+                if res and res.get('rt_cd') == '0' and res.get('output1'):
+                    for item in res.get('output1', []):
+                        if int(item.get('ovrs_cblc_qty', 0)) > 0:
+                            eval_usd = float(item.get('frcr_evlu_amt', 0))
+                            total_eval_usd += eval_usd
+                            all_stocks.append({
+                                "symbol": item['ovrs_pdno'],
+                                "name": item['ovrs_item_name'],
+                                "quantity": int(item['ovrs_cblc_qty']),
+                                "average_price": float(item['pchs_avg_pric']),
+                                "current_price": float(item['now_pric1']),
+                                "eval_amount": eval_usd * exchange_rate # KRW로 변환
+                            })
             except Exception as e:
                 from exchange.utility import log_message
                 log_message(f"KIS 해외 잔고 조회 실패 ({exch_code}): {e}")
 
+        total_krw = total_eval_usd * exchange_rate
         return {"total_krw": total_krw, "stocks": all_stocks}
 
     def open_json(self, path):

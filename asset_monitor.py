@@ -93,106 +93,107 @@ class AssetMonitor:
         return assets
     
     async def get_stock_assets(self) -> Dict[str, Dict]:
-    """주식 계좌 자산 조회"""
-    assets = {}
-    
-    for kis_num in range(1, 51):  # KIS1부터 KIS50까지 확인
-        try:
-            kis_key = getattr(settings, f'KIS{kis_num}_KEY', None)
-            if kis_key:
-                try:
-                    # KRX를 통해 KIS bot 로드
+        """주식 계좌 자산 조회 (개선된 KIS 모듈 사용)"""
+        assets = {}
+        for kis_num in range(1, 51):
+            try:
+                if getattr(settings, f'KIS{kis_num}_KEY', None):
                     bot = get_bot('KRX', kis_number=kis_num)
-                    
-                    # get_balance 메서드 존재 여부 확인
                     if hasattr(bot, 'get_balance'):
-                        balance_info = bot.get_balance()
+                        balance_data = bot.get_balance()
                         
-                        assets[f'KIS{kis_num}'] = {
-                            'total_krw': balance_info.get('total_krw', 0),
-                            'stocks': balance_info.get('stocks', [])
-                        }
+                        # 데이터 추출
+                        domestic = balance_data.get("domestic_balance", {})
+                        overseas = balance_data.get("overseas_balance", {})
+                        exchange_rate = balance_data.get("exchange_rate", 1350.0)
+
+                        # 국내 자산
+                        dom_total_krw = domestic.get("total_krw", 0)
+                        dom_stocks = domestic.get("stocks", [])
+
+                        # 해외 자산
+                        ovs_total_usd = overseas.get("total_usd", 0)
+                        ovs_stocks = overseas.get("stocks", [])
+                        ovs_total_krw = ovs_total_usd * exchange_rate
+                        
+                        # 전체 ��산
+                        total_krw = dom_total_krw + ovs_total_krw
+                        all_stocks = dom_stocks + ovs_stocks
+                        
+                        if total_krw > 0:
+                            assets[f'KIS{kis_num}'] = {
+                                'total_krw': total_krw,
+                                'total_krw_dom': dom_total_krw,
+                                'total_usd_ovs': ovs_total_usd,
+                                'stocks_dom': dom_stocks,
+                                'stocks_ovs': ovs_stocks,
+                                'exchange_rate': exchange_rate,
+                                'is_rate_fallback': balance_data.get("is_rate_fallback", False)
+                            }
                     else:
                         log_message(f'KIS{kis_num}: get_balance 메서드가 없습니다')
-                        
-                except Exception as e:
-                    log_message(f'KIS{kis_num} 자산 조회 실패: {str(e)}')
-                    
-        except Exception as e:
-            log_message(f'KIS{kis_num} 설정 확인 실패: {str(e)}')
-            
-    return assets
-    
+            except Exception as e:
+                log_message(f'KIS{kis_num} 자산 조회 실패: {str(e)}')
+        return assets
+
     def format_asset_message(self, crypto_assets: Dict, stock_assets: Dict) -> Dict:
-        """디스코드 메시지 포맷팅"""
+        """디스코드 메시지 포맷팅 (개선된 KIS 데이터 반영)"""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
         embeds = [{
             "title": "💰 POA Bot 자산 현황",
             "description": f"조회 시간: {timestamp}",
-            "color": 0x00ff00,
+            "color": 0x4A90E2, # KIS Blue
             "fields": []
         }]
         
-        # 암호화폐 자산
+        # 암호화폐 자산 (기존과 동일)
         if crypto_assets:
-            crypto_field = {
-                "name": "🪙 암호화폐 거래소",
-                "value": "",
-                "inline": False
-            }
-            
+            crypto_field = {"name": "🪙 암호화폐 거래소", "value": "", "inline": False}
             for exchange, data in crypto_assets.items():
                 value_lines = [f"**{exchange}**"]
-                
-                if exchange in ["UPBIT", "BITHUMB"]:
-                    total_krw = data.get("total_krw", 0)
-                    value_lines.append(f"총 자산: {total_krw:,.0f} KRW")
+                if "total_krw" in data:
+                    value_lines.append(f"총 자산: {data['total_krw']:,.0f} KRW")
                 else:
-                    total_usdt = data.get("total_usdt", 0)
-                    value_lines.append(f"총 자산: {total_usdt:,.2f} USDT")
+                    value_lines.append(f"총 자산: {data.get('total_usdt', 0):,.2f} USDT")
                 
-                # 주요 보유 자산 표시
                 balances = data.get("balances", {})
-                major_assets = sorted(
-                    [(k, v) for k, v in balances.items() if v > 0],
-                    key=lambda x: x[1],
-                    reverse=True
-                )[:5]  # 상위 5개만 표시
-                
+                major_assets = sorted([(k, v) for k, v in balances.items() if v > 0 and k not in ["KRW", "USDT"]], key=lambda x: x[1], reverse=True)[:5]
                 if major_assets:
                     value_lines.append("주요 보유:")
-                    for asset, amount in major_assets:
-                        if asset not in ["KRW", "USDT", "total_krw"]:
-                            value_lines.append(f"  • {asset}: {amount:.4f}")
-                
+                    value_lines.extend([f"  • {asset}: {amount:g}" for asset, amount in major_assets])
                 crypto_field["value"] += "\n".join(value_lines) + "\n\n"
-            
             embeds[0]["fields"].append(crypto_field)
-        
-        # 주식 자산
+
+        # 주식 자산 (개선된 포맷)
         if stock_assets:
-            stock_field = {
-                "name": "📈 주식 계좌",
-                "value": "",
-                "inline": False
-            }
-            
+            stock_field = {"name": "📈 주식 계좌", "value": "", "inline": False}
+            total_stock_krw = sum(data.get('total_krw', 0) for data in stock_assets.values())
+            stock_field["value"] = f"**총 평가액: {total_stock_krw:,.0f} 원**\n\n"
+
             for account, data in stock_assets.items():
-                total_krw = data.get("total_krw", 0)
-                stock_field["value"] += f"**{account}**: {total_krw:,.0f} KRW\n"
+                rate_info = f"(환율: {data['exchange_rate']:,.2f})"
+                if data.get('is_rate_fallback'): rate_info += " (추정)"
+
+                stock_field["value"] += f"**{account}** | 총 {data['total_krw']:,.0f} 원 {rate_info}\n"
                 
-                stocks = data.get("stocks", [])
-                if stocks:
-                    for stock in stocks[:5]: # 상위 5개 종목만 표시
-                        stock_field["value"] += f"  • {stock['name']} ({stock['symbol']}): {stock['quantity']}주\n"
-            
+                # 국내 주식
+                if data['stocks_dom']:
+                    stock_field["value"] += f"  - 🇰🇷 국내: **{data['total_krw_dom']:,.0f} 원**\n"
+                    for stock in sorted(data['stocks_dom'], key=lambda x: x.eval_amount, reverse=True)[:5]:
+                        stock_field["value"] += f"    • {stock.name}: {stock.eval_amount:,.0f}원 ({stock.quantity}주)\n"
+
+                # 해외 주식
+                if data['stocks_ovs']:
+                    ovs_krw = data['total_usd_ovs'] * data['exchange_rate']
+                    stock_field["value"] += f"  - 🇺🇸 해외: **${data['total_usd_ovs']:,.2f}** (약 {ovs_krw:,.0f}원)\n"
+                    for stock in sorted(data['stocks_ovs'], key=lambda x: x.eval_amount_usd, reverse=True)[:5]:
+                        stock_field["value"] += f"    • {stock.name}: ${stock.eval_amount_usd:,.2f} ({stock.quantity}주)\n"
+                stock_field["value"] += "\n"
+
             embeds[0]["fields"].append(stock_field)
         
-        return {
-            "content": None,
-            "embeds": embeds
-        }
+        return {"content": None, "embeds": embeds}
     
     async def send_discord_notification(self, message: Dict):
         """디스코드 웹훅으로 메시지 전송"""

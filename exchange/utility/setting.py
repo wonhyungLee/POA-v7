@@ -1,6 +1,9 @@
 from exchange.model import Settings
 from functools import lru_cache
 import sys
+import os
+from exchange.model import Settings
+from functools import lru_cache
 
 
 @lru_cache()
@@ -16,3 +19,10 @@ def get_settings():
 
 
 settings = get_settings()
+
+# Manually parse WHITELIST
+raw_allowed_ips = os.getenv("ALLOWED_IPS")
+if raw_allowed_ips:
+    settings.WHITELIST = [ip.strip() for ip in raw_allowed_ips.split(',') if ip.strip()]
+else:
+    settings.WHITELIST = []

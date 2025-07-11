@@ -9,7 +9,7 @@ from .bithumb import Bithumb
 from .bybit import Bybit
 from .bitget import Bitget
 from .okx import Okx
-from .stock import KoreaInvestment
+from .stock import ImprovedKoreaInvestment
 from exchange.utility import settings, log_message
 from .database import db
 from typing import Literal
@@ -29,56 +29,56 @@ class Exchange(BaseModel):
     BYBIT: Bybit | None = None
     BITGET: Bitget | None = None
     OKX: Okx | None = None
-    KIS1: KoreaInvestment | None = None
-    KIS2: KoreaInvestment | None = None
-    KIS3: KoreaInvestment | None = None
-    KIS4: KoreaInvestment | None = None
-    KIS5: KoreaInvestment | None = None
-    KIS6: KoreaInvestment | None = None
-    KIS7: KoreaInvestment | None = None
-    KIS8: KoreaInvestment | None = None
-    KIS9: KoreaInvestment | None = None
-    KIS10: KoreaInvestment | None = None
-    KIS11: KoreaInvestment | None = None
-    KIS12: KoreaInvestment | None = None
-    KIS13: KoreaInvestment | None = None
-    KIS14: KoreaInvestment | None = None
-    KIS15: KoreaInvestment | None = None
-    KIS16: KoreaInvestment | None = None
-    KIS17: KoreaInvestment | None = None
-    KIS18: KoreaInvestment | None = None
-    KIS19: KoreaInvestment | None = None
-    KIS20: KoreaInvestment | None = None
-    KIS21: KoreaInvestment | None = None
-    KIS22: KoreaInvestment | None = None
-    KIS23: KoreaInvestment | None = None
-    KIS24: KoreaInvestment | None = None
-    KIS25: KoreaInvestment | None = None
-    KIS26: KoreaInvestment | None = None
-    KIS27: KoreaInvestment | None = None
-    KIS28: KoreaInvestment | None = None
-    KIS29: KoreaInvestment | None = None
-    KIS30: KoreaInvestment | None = None
-    KIS31: KoreaInvestment | None = None
-    KIS32: KoreaInvestment | None = None
-    KIS33: KoreaInvestment | None = None
-    KIS34: KoreaInvestment | None = None
-    KIS35: KoreaInvestment | None = None
-    KIS36: KoreaInvestment | None = None
-    KIS37: KoreaInvestment | None = None
-    KIS38: KoreaInvestment | None = None
-    KIS39: KoreaInvestment | None = None
-    KIS40: KoreaInvestment | None = None
-    KIS41: KoreaInvestment | None = None
-    KIS42: KoreaInvestment | None = None
-    KIS43: KoreaInvestment | None = None
-    KIS44: KoreaInvestment | None = None
-    KIS45: KoreaInvestment | None = None
-    KIS46: KoreaInvestment | None = None
-    KIS47: KoreaInvestment | None = None
-    KIS48: KoreaInvestment | None = None
-    KIS49: KoreaInvestment | None = None
-    KIS50: KoreaInvestment | None = None
+    KIS1: ImprovedKoreaInvestment | None = None
+    KIS2: ImprovedKoreaInvestment | None = None
+    KIS3: ImprovedKoreaInvestment | None = None
+    KIS4: ImprovedKoreaInvestment | None = None
+    KIS5: ImprovedKoreaInvestment | None = None
+    KIS6: ImprovedKoreaInvestment | None = None
+    KIS7: ImprovedKoreaInvestment | None = None
+    KIS8: ImprovedKoreaInvestment | None = None
+    KIS9: ImprovedKoreaInvestment | None = None
+    KIS10: ImprovedKoreaInvestment | None = None
+    KIS11: ImprovedKoreaInvestment | None = None
+    KIS12: ImprovedKoreaInvestment | None = None
+    KIS13: ImprovedKoreaInvestment | None = None
+    KIS14: ImprovedKoreaInvestment | None = None
+    KIS15: ImprovedKoreaInvestment | None = None
+    KIS16: ImprovedKoreaInvestment | None = None
+    KIS17: ImprovedKoreaInvestment | None = None
+    KIS18: ImprovedKoreaInvestment | None = None
+    KIS19: ImprovedKoreaInvestment | None = None
+    KIS20: ImprovedKoreaInvestment | None = None
+    KIS21: ImprovedKoreaInvestment | None = None
+    KIS22: ImprovedKoreaInvestment | None = None
+    KIS23: ImprovedKoreaInvestment | None = None
+    KIS24: ImprovedKoreaInvestment | None = None
+    KIS25: ImprovedKoreaInvestment | None = None
+    KIS26: ImprovedKoreaInvestment | None = None
+    KIS27: ImprovedKoreaInvestment | None = None
+    KIS28: ImprovedKoreaInvestment | None = None
+    KIS29: ImprovedKoreaInvestment | None = None
+    KIS30: ImprovedKoreaInvestment | None = None
+    KIS31: ImprovedKoreaInvestment | None = None
+    KIS32: ImprovedKoreaInvestment | None = None
+    KIS33: ImprovedKoreaInvestment | None = None
+    KIS34: ImprovedKoreaInvestment | None = None
+    KIS35: ImprovedKoreaInvestment | None = None
+    KIS36: ImprovedKoreaInvestment | None = None
+    KIS37: ImprovedKoreaInvestment | None = None
+    KIS38: ImprovedKoreaInvestment | None = None
+    KIS39: ImprovedKoreaInvestment | None = None
+    KIS40: ImprovedKoreaInvestment | None = None
+    KIS41: ImprovedKoreaInvestment | None = None
+    KIS42: ImprovedKoreaInvestment | None = None
+    KIS43: ImprovedKoreaInvestment | None = None
+    KIS44: ImprovedKoreaInvestment | None = None
+    KIS45: ImprovedKoreaInvestment | None = None
+    KIS46: ImprovedKoreaInvestment | None = None
+    KIS47: ImprovedKoreaInvestment | None = None
+    KIS48: ImprovedKoreaInvestment | None = None
+    KIS49: ImprovedKoreaInvestment | None = None
+    KIS50: ImprovedKoreaInvestment | None = None
     
     class Config:
         arbitrary_types_allowed = True
@@ -113,13 +113,12 @@ def get_exchange(exchange_name: str, kis_number=None):
         KEY, SECRET, ACCOUNT_NUMBER, ACCOUNT_CODE = key
         if not payload.get(_kis):
             payload |= {
-                _kis: globals()["KoreaInvestment"](
+                _kis: globals()["ImprovedKoreaInvestment"](
                     KEY, SECRET, ACCOUNT_NUMBER, ACCOUNT_CODE, kis_number
                 )
             }
         exchange = Exchange(**payload)
-        kis: KoreaInvestment = exchange.dict()[_kis]
-        kis.auth()
+        kis: ImprovedKoreaInvestment = exchange.dict()[_kis]
         return kis
 
 
@@ -128,7 +127,7 @@ def get_bot(
         "BINANCE", "UPBIT", "BITHUMB", "BYBIT", "BITGET", "KRX", "NASDAQ", "NYSE", "AMEX", "OKX"
     ],
     kis_number=None,
-) -> Binance | Upbit | Bithumb | Bybit | Bitget | KoreaInvestment | Okx:
+) -> Binance | Upbit | Bithumb | Bybit | Bitget | ImprovedKoreaInvestment | Okx:
     exchange_name = exchange_name.upper()
     if exchange_name in CRYPTO_EXCHANGES:
         return get_exchange(exchange_name, kis_number).dict()[exchange_name]

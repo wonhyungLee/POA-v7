@@ -60,7 +60,7 @@ def check_env():
         
         # KIS 계좌 확인
         print("\n📈 KIS 계좌:")
-        for i in range(1, 5):
+        for i in range(1, 51):
             if f"KIS{i}_KEY=" in env_content:
                 for line in env_content.split("\n"):
                     if line.startswith(f"KIS{i}_KEY="):

@@ -11,6 +11,7 @@ import httpx
 from pydantic import BaseModel, Field
 from exchange.model import MarketOrder
 from exchange.utility import settings
+from exchange.utility.LogMaker import log_order_message
 from devtools import debug
 
 
@@ -117,8 +118,8 @@ class Bithumb:
         response = self.session.post(url, headers=headers, data=params)
         return self._handle_response(response)
     
-    def create_order(self, symbol: str, side: str, amount: float, 
-                    price: Optional[float] = None, order_type: str = "market") -> Dict[str, Any]:
+    def create_order(self, symbol: str, side: str, amount: float,
+                    price: Optional[float] = None, order_type: str = "market", cost: Optional[float] = None) -> Dict[str, Any]:
         """주문 생성"""
         endpoint = "/trade/place"
         
@@ -145,7 +146,7 @@ class Bithumb:
         result = self._handle_response(response)
         
         # 주문 결과 포맷 통일
-        return {
+        order_result = {
             'id': result.get('order_id'),
             'symbol': f"{symbol}/KRW",
             'side': side,
@@ -155,32 +156,42 @@ class Bithumb:
             'exchange': 'BITHUMB',
             'timestamp': datetime.now().isoformat()
         }
+        if cost:
+            order_result['cost'] = cost
+        return order_result
     
     def market_buy(self, order_info: MarketOrder) -> Dict[str, Any]:
         """시장가 매수"""
         # Bithumb은 원화 기준으로 주문하므로 amount 대신 cost 사용
+        cost = None
         if order_info.cost:
             # cost를 현재가로 나누어 수량 계산
             current_price = self.fetch_price(order_info.base, "KRW")
             amount = order_info.cost / current_price
+            cost = order_info.cost
         else:
             amount = order_info.amount
             
-        return self.create_order(
+        result = self.create_order(
             symbol=order_info.base,
             side="buy",
             amount=amount,
-            order_type="market"
+            order_type="market",
+            cost=cost
         )
+        log_order_message("BITHUMB", result, order_info)
+        return result
     
     def market_sell(self, order_info: MarketOrder) -> Dict[str, Any]:
         """시장가 매도"""
-        return self.create_order(
+        result = self.create_order(
             symbol=order_info.base,
             side="sell",
             amount=order_info.amount,
             order_type="market"
         )
+        log_order_message("BITHUMB", result, order_info)
+        return result
     
     def cancel_order(self, order_id: str, symbol: str, side: str) -> Dict[str, Any]:
         """주문 취소"""

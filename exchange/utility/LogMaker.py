@@ -72,16 +72,14 @@ def log_order_message(exchange_name, order_result: dict, order_info: MarketOrder
     date = parse_time(datetime.utcnow().timestamp())
     if not order_info.is_futures and order_info.is_buy and exchange_name in COST_BASED_ORDER_EXCHANGES:
         f_name = "비용"
-        if order_info.amount is not None:
-            if exchange_name == "UPBIT":
+        amount = None
+        if order_info.cost is not None:
+            if exchange_name in ("UPBIT", "BITHUMB"):
                 amount = str(order_result.get("cost"))
             elif exchange_name == "BITGET":
                 amount = str(order_info.amount * order_info.price)
             elif exchange_name == "BYBIT":
                 amount = str(order_result.get("info").get("orderQty"))
-        elif order_info.percent is not None:
-            f_name = "비율"
-            amount = f"{order_info.percent}%"
 
     else:
         f_name = "수량"

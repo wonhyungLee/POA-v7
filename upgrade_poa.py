@@ -153,10 +153,17 @@ KIS1_ACCOUNT_NUMBER=""
 KIS1_ACCOUNT_CODE="01"
 
 # 추가 KIS 계정은 필요시 설정
+# KIS2 ~ KIS50
 """
     
     with open(env_path, 'w', encoding='utf-8') as f:
         f.write(default_env)
+        for i in range(2, 51):
+            f.write(f'KIS{i}_KEY=""\n')
+            f.write(f'KIS{i}_SECRET=""\n')
+            f.write(f'KIS{i}_ACCOUNT_NUMBER=""\n')
+            f.write(f'KIS{i}_ACCOUNT_CODE=""\n\n')
+
 
 if __name__ == "__main__":
     upgrade_poa()

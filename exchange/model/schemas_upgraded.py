@@ -106,6 +106,12 @@ class Settings(BaseSettings):
     BITHUMB_KEY: str | None = None
     BITHUMB_SECRET: str | None = None
     
+    @validator("WHITELIST", pre=True)
+    def split_str(cls, v):
+        if isinstance(v, str):
+            return [item.strip() for item in v.split(",") if item.strip()]
+        return v
+    
     # KIS 1-50 실전투자 계정 설정
     KIS1_ACCOUNT_NUMBER: str | None = None
     KIS1_ACCOUNT_CODE: str | None = None
