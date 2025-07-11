@@ -238,5 +238,12 @@ async def run_periodic_asset_report(interval_hours: int = 6):
 
 # 단독 실행 테스트
 if __name__ == "__main__":
-    monitor = AssetMonitor()
-    asyncio.run(monitor.report_assets())
+    # 설정 파일에서 간격 불러오기 (없으면 기본 6시간)
+    try:
+        from exchange.utility import settings
+        interval = getattr(settings, 'ASSET_MONITOR_INTERVAL_HOURS', 6)
+    except (ImportError, AttributeError):
+        interval = 6
+        
+    log_message(f"자산 모니터링 스크립트 단독 실행 (주기: {interval}시간)")
+    asyncio.run(run_periodic_asset_report(interval_hours=interval))

@@ -86,14 +86,35 @@ class ImprovedKoreaInvestment:
         self.access_token = None
         self.token_expires_at = None
         self.last_auth_check = None
+        self.is_auth = False
+        self.base_headers = {}
+
+        # 데이터베이스에서 기존 토큰 정보 로드
+        try:
+            auth_id = f"KIS{self.kis_number}"
+            auth_data = db.get_auth(auth_id)
+            if auth_data:
+                token, expires_str = auth_data
+                expires_dt = datetime.strptime(expires_str, "%Y-%m-%d %H:%M:%S")
+                if datetime.now() + timedelta(minutes=10) < expires_dt:
+                    self.access_token = token
+                    self.token_expires_at = expires_dt
+                    self.is_auth = True
+                    self.base_headers = {
+                        "authorization": f"Bearer {self.access_token}",
+                        "appkey": self.key,
+                        "appsecret": self.secret,
+                        "custtype": "P"
+                    }
+                    if self.debugger: self.debugger.log_auth_event("token_loaded_from_db", True, {"expires_at": expires_str})
+        except Exception as e:
+            if self.debugger: self.debugger.log_auth_event("token_db_load_error", False, {"error": str(e)})
         
         self.api_call_times = []
         self.max_calls_per_second = 18
         self.max_calls_per_minute = 950
         
         self.session = httpx.Client(timeout=30.0)
-        self.is_auth = False
-        self.base_headers = {}
         
         self.base_order_body = AccountInfo(
             CANO=account_number, ACNT_PRDT_CD=account_code
